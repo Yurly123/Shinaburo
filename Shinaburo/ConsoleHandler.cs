@@ -19,5 +19,10 @@ namespace Shinaburo
         {
             console.AppendText(text);
         }
+        public void ShowCompileError(int Line)
+        {
+            console.AppendText("문법 오류가 발생하였습니다.\n");
+            console.AppendText($"{Line}번째 행에서 알 수 없는 문자가 발견되었습니다.");
+        }
     }
 }
