@@ -45,6 +45,7 @@
             this.CodeBox.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.ForcedBoth;
             this.CodeBox.Size = new System.Drawing.Size(640, 681);
             this.CodeBox.TabIndex = 0;
+            this.CodeBox.TabStop = false;
             this.CodeBox.Text = "";
             this.CodeBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.CodeBox_KeyDown);
             // 
@@ -60,6 +61,7 @@
             this.ConsoleBox.ReadOnly = true;
             this.ConsoleBox.Size = new System.Drawing.Size(600, 681);
             this.ConsoleBox.TabIndex = 1;
+            this.ConsoleBox.TabStop = false;
             this.ConsoleBox.Text = "";
             // 
             // CompileButton
@@ -72,6 +74,7 @@
             this.CompileButton.Name = "CompileButton";
             this.CompileButton.Size = new System.Drawing.Size(125, 50);
             this.CompileButton.TabIndex = 2;
+            this.CompileButton.TabStop = false;
             this.CompileButton.Text = "글 엮기";
             this.CompileButton.UseVisualStyleBackColor = false;
             this.CompileButton.Click += new System.EventHandler(this.Compile);
