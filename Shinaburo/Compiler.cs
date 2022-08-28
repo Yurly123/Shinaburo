@@ -9,9 +9,7 @@ namespace Shinaburo
     internal class Compiler
     {
         ConsoleHandler console;
-        string OriginalCode;
-        List<string> ReservedWords = new List<string> { "을", "를", "써라" };
-        string OutputBuffer = string.Empty;
+        List<Function> FunctionPool = new List<Function>();
 
         public Compiler(ConsoleHandler console)
         {
@@ -19,82 +17,86 @@ namespace Shinaburo
         }
         public void Compile(string Code)
         {
-            OriginalCode = Code;
-            // Ignore tab charator, and comments
-            // 탭 문자, 주석 무시
-            Code = Code.Replace("\t", string.Empty);
-            string[] CommentStrings = Code.Split('(');
-            if (CommentStrings.Length > 1)
+            string[] Statememts = Code.Split('\n');
+            for(int Line = 0; Line < Statememts.Length; Line++)
             {
-                Code = string.Empty;
-                foreach (var commentstring in CommentStrings)
+                string Statement = Statememts[Line];
+                Statement = Statement.Trim();
+
+                if (Statement.Last() != '.')
                 {
-                    int CommentIndex = commentstring.IndexOf(')') + 1;
-                    if (CommentIndex < 0) Code += commentstring;
-                    else
+                    if (Statement.Last() == ':')
                     {
-                        if (commentstring.Contains('\n'))
+                        // 함수 선언
+                        string TempSt = Statement;
+
+                        Type ReturnType = Compiler.GetTypevalue(TempSt.Remove(TempSt.IndexOf(' ')));
+                        if (ReturnType != typeof(void))
                         {
-                            console.ShowCompileError(OriginalCode.Split('\n').Length - 1, "괄호가 닫히지 않은채로 문장이 끝났습니다.");
+                            TempSt = TempSt.Substring(TempSt.IndexOf(' '));
+                        }
+                        TempSt = TempSt.Trim();
+
+                        string Name = TempSt.Remove(TempSt.IndexOf(' '));
+                        TempSt = TempSt.Substring(TempSt.IndexOf(' ')).Trim();
+
+                        if (TempSt.Remove(TempSt.IndexOf(' ')) != "은" && TempSt.Remove(TempSt.IndexOf(' ')) != "는")
+                        {
+                            console.ShowCompileError(Line + 1, "함수 선언문에는 \'을\' 혹은 \'를\'조사가 필요합니다.");
                             return;
                         }
-                        Code += commentstring.Substring(CommentIndex, commentstring.Length - CommentIndex);
+                        TempSt = TempSt.Substring(TempSt.IndexOf(' ')).Replace(" ", string.Empty);
+                        if (TempSt != "다음과같다:")
+                        {
+                            console.ShowCompileError(Line + 1, "함수 선언문은 \"은(는) 다음과 같다:\"형식으로 끝나야 합니다.");
+                            return;
+                        }
+
+                        FunctionPool.Add(new Function(Name, ReturnType));
+                    }
+                    else
+                    {
+                        console.ShowCompileError(Line + 1, "문장 끝에 온점('.')이 필요합니다.");
+                        return;
                     }
                 }
             }
-            List<string> Codes = Code.Split('\n').ToList();
-
-            // Compile actual codes
-            // 의미있는 코드들 컴파일
-            for (int i = 0; i < Codes.Count; ++i)
+        }
+        public static Type GetTypevalue(string Text)
+        {
+            switch (Text)
             {
-                var Statement = Codes[i];
-
-                List<string> Tokens = new List<string>();
-                foreach(string Token in Statement.Trim().Split(' '))
-                {
-                    if (Token != string.Empty) Tokens.Add(Token);
-                }
-                if (Statement.Replace(" ", string.Empty) == string.Empty) continue;
-                if (Tokens.Last().Last() != '.')
-                {
-                    console.ShowCompileError(i + 1, "문장 마지막에 \'.\'문자가 들어가있지 않았습니다.");
-                    return;
-                }
-
-                switch (Tokens.Last().Remove(Tokens.Last().Length - 1))
-                {
-                    case "써라":
-                        if (Tokens[Tokens.Count - 2] == "를" || Tokens[Tokens.Count - 2] == "을")
-                        {
-                            string OutputText = Statement.Trim();
-                            OutputText = OutputText.Remove(OutputText.Length - 3);
-                            while (OutputText.Last() == ' ') OutputText = OutputText.Remove(OutputText.Length - 1);
-                            OutputText = OutputText.Remove(OutputText.Length - 1);
-                            쓰다(OutputText);
-                        }
-                        else
-                        {
-                            console.ShowCompileError(i + 1, "\"써라\" 단어 앞에 \'을(를)\' 문자가 발견되지 않았습니다.");
-                            return;
-                        }
-                        break;
-                    default:
-                        console.ShowCompileError(i + 1, "알 수 없는 문자가 발견되었습니다.");
-                        return;
-                }
+                case "정수":
+                    return typeof(int);
+                case "실수":
+                    return typeof(double);
+                case "문자":
+                    return typeof(char);
+                case "문자열":
+                    return typeof(string);
+                case "명제":
+                    return typeof(bool);
+                default:
+                    return typeof(void);
             }
-            FlushOutputBuffer();
         }
-        void FlushOutputBuffer()
+    }
+
+    class Function
+    {
+        public string Name { get; }
+        public object[] Parameters { get; }
+        public Type ReturnType { get; }
+        public Function(string name, Type returntype, params object[] parameters)
         {
-            console.PrintToConsole(OutputBuffer);
-            OutputBuffer = string.Empty;
+            Name = name;
+            ReturnType = returntype;
+            Parameters = parameters;
         }
 
-        void 쓰다(string Text)
+        public void AddStatement(string statement)
         {
-            OutputBuffer += Text + '\n';
+
         }
     }
 }
