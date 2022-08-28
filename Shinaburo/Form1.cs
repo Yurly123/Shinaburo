@@ -13,13 +13,13 @@ namespace Shinaburo
     public partial class Form1 : Form
     {
         Compiler compiler;
-        ConsoleHandler consolehandler;
+        ConsoleHandler TextBoxConsole;
         public Form1()
         {
             InitializeComponent();
             Form1_SizeChanged(this, new EventArgs());
-            consolehandler = new ConsoleHandler(ConsoleBox);
-            compiler = new Compiler(consolehandler);
+            TextBoxConsole = new RichTextConsole(ConsoleBox);
+            compiler = new Compiler(TextBoxConsole);
         }
 
         private void Form1_SizeChanged(object sender, EventArgs e)

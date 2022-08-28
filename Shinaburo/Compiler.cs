@@ -47,7 +47,7 @@ namespace Shinaburo
             // Compile actual codes
             // 의미있는 코드들 컴파일
             for (int i = 0; i < Codes.Count; ++i)
-            {   
+            {
                 var Statement = Codes[i];
 
                 List<string> Tokens = new List<string>();
